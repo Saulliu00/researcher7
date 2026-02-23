@@ -20,7 +20,7 @@ Researcher7 automatically generates 30-minute voice scripts by:
 
 ## Quick Start
 
-### Installation (Coming Soon)
+### Installation
 ```bash
 # Clone the repository
 git clone https://github.com/Saulliu00/researcher7.git
@@ -35,11 +35,13 @@ pip install -r requirements.txt
 
 # Set up environment variables
 cp .env.example .env
-# Edit .env with your API keys (Anthropic Claude, etc.)
+nano .env  # Add your ANTHROPIC_API_KEY
 
 # Run the pipeline
 python main.py
 ```
+
+**See [SETUP.md](./SETUP.md) for detailed setup instructions and troubleshooting.**
 
 ### Example Output
 ```bash
@@ -104,16 +106,20 @@ See [BUSINESS_PLAN.md](./BUSINESS_PLAN.md) for detailed architecture and technic
 
 ## Project Status
 
-**Current Phase:** Planning & Design  
-**Timeline:** 12-week development roadmap (Weeks 1-2 in progress)
+**Current Phase:** ✅ Phase 1 Complete - MVP Ready!  
+**Status:** Working end-to-end pipeline (simplified, no database yet)
 
 ### Roadmap
-- [ ] **Phase 1:** Foundation (Scraper + Database) — *Weeks 1-2*
-- [ ] **Phase 2:** Correlation Engine — *Weeks 3-4*
-- [ ] **Phase 3:** Paper Discovery — *Weeks 5-6*
-- [ ] **Phase 4:** Script Generation — *Weeks 7-8*
-- [ ] **Phase 5:** Integration & Testing — *Weeks 9-10*
-- [ ] **Phase 6:** Deployment & Automation — *Weeks 11-12*
+- [x] **Phase 1:** Foundation - Core pipeline working! ✨
+  - [x] Trend scraper (Google Trends via pytrends)
+  - [x] Correlation engine (NLP embeddings + clustering)
+  - [x] Paper finder (Semantic Scholar + arXiv)
+  - [x] Script generator (Claude API)
+  - [x] End-to-end pipeline integration
+- [ ] **Phase 2:** Database & Persistence — *Next*
+- [ ] **Phase 3:** Web Interface & API
+- [ ] **Phase 4:** Advanced Features (multi-language, audio generation)
+- [ ] **Phase 5:** Production Deployment & Automation
 
 See [BUSINESS_PLAN.md](./BUSINESS_PLAN.md) for detailed timeline and milestones.
 
