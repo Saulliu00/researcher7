@@ -1,23 +1,42 @@
 """
-Script Generator - uses Claude API to generate 30-minute voice scripts
+Script Generator - uses LLM (local or cloud) to generate 30-minute voice scripts
+Supports: Ollama (local) and Anthropic Claude (cloud)
 """
 from anthropic import Anthropic
+import requests
 from typing import List, Dict
 import os
 
 
 class ScriptGenerator:
-    def __init__(self, api_key: str, model: str = "claude-sonnet-4-5"):
+    def __init__(self, provider: str = "ollama", **kwargs):
         """
-        Initialize script generator with Claude API
+        Initialize script generator with configurable LLM provider
         
         Args:
-            api_key: Anthropic API key
-            model: Claude model to use (default: claude-sonnet-4-5)
+            provider: "ollama" or "anthropic"
+            **kwargs: Provider-specific arguments
+                For ollama: base_url, model
+                For anthropic: api_key, model
         """
-        self.client = Anthropic(api_key=api_key)
-        self.model = model
+        self.provider = provider.lower()
         self.target_words = 4750  # Target for 30-minute script (~158 words/min)
+        
+        if self.provider == "ollama":
+            self.ollama_url = kwargs.get('base_url', 'http://127.0.0.1:11434')
+            self.model = kwargs.get('model', 'qwen3:8b')
+            print(f"Using Ollama: {self.model} @ {self.ollama_url}")
+            
+        elif self.provider == "anthropic":
+            api_key = kwargs.get('api_key')
+            if not api_key:
+                raise ValueError("Anthropic API key required for anthropic provider")
+            self.client = Anthropic(api_key=api_key)
+            self.model = kwargs.get('model', 'claude-sonnet-4-5')
+            print(f"Using Anthropic: {self.model}")
+            
+        else:
+            raise ValueError(f"Unknown provider: {provider}. Use 'ollama' or 'anthropic'")
     
     def generate_script(self, trends: List[Dict], correlation_data: Dict, 
                        paper: Dict) -> str:
@@ -32,12 +51,52 @@ class ScriptGenerator:
         Returns:
             Formatted script text (markdown)
         """
-        print(f"Generating script with {self.model}...")
+        print(f"Generating script with {self.provider} ({self.model})...")
         
         # Build the prompt
         prompt = self._build_prompt(trends, correlation_data, paper)
         
-        # Call Claude API
+        # Generate based on provider
+        if self.provider == "ollama":
+            script = self._generate_ollama(prompt)
+        else:
+            script = self._generate_anthropic(prompt)
+        
+        # Add metadata header
+        header = self._create_header(trends, correlation_data, paper)
+        full_script = f"{header}\n\n{script}"
+        
+        print(f"✓ Generated script ({self._count_words(script):,} words)")
+        
+        return full_script
+    
+    def _generate_ollama(self, prompt: str) -> str:
+        """Generate script using local Ollama"""
+        try:
+            response = requests.post(
+                f"{self.ollama_url}/api/generate",
+                json={
+                    "model": self.model,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.7,
+                        "num_predict": 6000,  # Allow ~6000 tokens for script
+                    }
+                },
+                timeout=600  # 10 minutes timeout for local generation
+            )
+            response.raise_for_status()
+            
+            result = response.json()
+            return result.get('response', '')
+            
+        except requests.exceptions.RequestException as e:
+            print(f"Ollama error: {e}")
+            raise
+    
+    def _generate_anthropic(self, prompt: str) -> str:
+        """Generate script using Anthropic Claude API"""
         try:
             message = self.client.messages.create(
                 model=self.model,
@@ -49,23 +108,15 @@ class ScriptGenerator:
                 }]
             )
             
-            script = message.content[0].text
-            
-            # Add metadata header
-            header = self._create_header(trends, correlation_data, paper)
-            full_script = f"{header}\n\n{script}"
-            
-            print(f"✓ Generated script ({self._count_words(script):,} words)")
-            
-            return full_script
+            return message.content[0].text
             
         except Exception as e:
-            print(f"Error generating script: {e}")
+            print(f"Anthropic error: {e}")
             raise
     
     def _build_prompt(self, trends: List[Dict], correlation_data: Dict, 
                      paper: Dict) -> str:
-        """Build the Claude prompt for script generation"""
+        """Build the LLM prompt for script generation"""
         
         # Extract key data
         unified_topic = correlation_data['unified_topic']
@@ -142,6 +193,8 @@ Write the complete script now. Do not include any meta-commentary - just the scr
         header = f"""# Researcher7 Voice Script
 
 **Generated:** {self._get_timestamp()}
+**LLM Provider:** {self.provider}
+**Model:** {self.model}
 **Unified Topic:** {correlation_data['unified_topic']['theme']}
 **Research Paper:** {paper['title']}
 **Target Length:** 30 minutes (~{self.target_words} words)
@@ -172,14 +225,29 @@ URL: {paper['url']}
 
 
 if __name__ == "__main__":
-    # Test the script generator (requires API key)
-    api_key = os.getenv("ANTHROPIC_API_KEY")
+    # Test the script generator
+    import os
+    from dotenv import load_dotenv
+    load_dotenv()
     
-    if not api_key:
-        print("Error: ANTHROPIC_API_KEY not set")
-        exit(1)
+    provider = os.getenv("LLM_PROVIDER", "ollama").lower()
     
-    generator = ScriptGenerator(api_key)
+    if provider == "ollama":
+        generator = ScriptGenerator(
+            provider="ollama",
+            base_url=os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434"),
+            model=os.getenv("OLLAMA_MODEL", "qwen3:8b")
+        )
+    else:
+        api_key = os.getenv("ANTHROPIC_API_KEY")
+        if not api_key:
+            print("Error: ANTHROPIC_API_KEY not set")
+            exit(1)
+        generator = ScriptGenerator(
+            provider="anthropic",
+            api_key=api_key,
+            model=os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5")
+        )
     
     # Demo data
     demo_trends = [

@@ -19,12 +19,14 @@ from script_generator import ScriptGenerator
 
 
 class Researcher7:
-    def __init__(self, anthropic_api_key: str, semantic_scholar_key: str = None):
+    def __init__(self, llm_provider: str = "ollama", llm_config: dict = None, 
+                 semantic_scholar_key: str = None):
         """
         Initialize the Researcher7 pipeline
         
         Args:
-            anthropic_api_key: Anthropic API key (required)
+            llm_provider: LLM provider ("ollama" or "anthropic")
+            llm_config: Provider-specific configuration dict
             semantic_scholar_key: Semantic Scholar API key (optional)
         """
         print("Initializing Researcher7...")
@@ -33,7 +35,7 @@ class Researcher7:
         self.trend_scraper = TrendScraper()
         self.correlation_engine = CorrelationEngine()
         self.paper_finder = PaperFinder(api_key=semantic_scholar_key)
-        self.script_generator = ScriptGenerator(api_key=anthropic_api_key)
+        self.script_generator = ScriptGenerator(provider=llm_provider, **(llm_config or {}))
         
         print("✓ All components initialized!")
         print("="*60 + "\n")
@@ -141,14 +143,35 @@ def main():
     # Load environment variables
     load_dotenv()
     
-    # Get API keys
-    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+    # Get LLM provider configuration
+    llm_provider = os.getenv("LLM_PROVIDER", "ollama").lower()
     semantic_scholar_key = os.getenv("SEMANTIC_SCHOLAR_API_KEY")
     
-    if not anthropic_key:
-        print("❌ Error: ANTHROPIC_API_KEY not found in environment")
-        print("Please create a .env file with your API key:")
-        print("  ANTHROPIC_API_KEY=your_key_here")
+    # Build provider-specific config
+    llm_config = {}
+    if llm_provider == "ollama":
+        llm_config = {
+            'base_url': os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434"),
+            'model': os.getenv("OLLAMA_MODEL", "qwen3:8b")
+        }
+        print(f"🤖 LLM Provider: Ollama ({llm_config['model']})")
+        
+    elif llm_provider == "anthropic":
+        anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+        if not anthropic_key:
+            print("❌ Error: ANTHROPIC_API_KEY not found in environment")
+            print("Please add to .env file:")
+            print("  ANTHROPIC_API_KEY=your_key_here")
+            sys.exit(1)
+        llm_config = {
+            'api_key': anthropic_key,
+            'model': os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5")
+        }
+        print(f"🤖 LLM Provider: Anthropic ({llm_config['model']})")
+        
+    else:
+        print(f"❌ Error: Unknown LLM_PROVIDER: {llm_provider}")
+        print("Valid options: 'ollama' or 'anthropic'")
         sys.exit(1)
     
     # Parse command line arguments
@@ -160,13 +183,35 @@ def main():
                        help='Country for trends (default: united_states)')
     parser.add_argument('--output', type=str, default='outputs',
                        help='Output directory (default: outputs)')
+    parser.add_argument('--provider', type=str, choices=['ollama', 'anthropic'],
+                       help='Override LLM provider from .env')
     
     args = parser.parse_args()
+    
+    # Override provider from command line if specified
+    if args.provider:
+        llm_provider = args.provider
+        # Rebuild config for overridden provider
+        if llm_provider == "ollama":
+            llm_config = {
+                'base_url': os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434"),
+                'model': os.getenv("OLLAMA_MODEL", "qwen3:8b")
+            }
+        else:
+            anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+            if not anthropic_key:
+                print("❌ Error: ANTHROPIC_API_KEY required for anthropic provider")
+                sys.exit(1)
+            llm_config = {
+                'api_key': anthropic_key,
+                'model': os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5")
+            }
     
     # Run pipeline
     try:
         researcher = Researcher7(
-            anthropic_api_key=anthropic_key,
+            llm_provider=llm_provider,
+            llm_config=llm_config,
             semantic_scholar_key=semantic_scholar_key
         )
         
