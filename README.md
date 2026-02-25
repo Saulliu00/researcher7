@@ -2,9 +2,25 @@
 
 > AI-powered content generation that bridges trending topics with academic research
 
-[![Status](https://img.shields.io/badge/status-planning-yellow)]()
+[![Status](https://img.shields.io/badge/status-phase_1_mvp_70%25-orange)]()
 [![Python](https://img.shields.io/badge/python-3.11+-blue)]()
 [![License](https://img.shields.io/badge/license-MIT-green)]()
+
+## 🚀 Current Status
+
+**Phase 1 MVP:** 70% Complete (7/10 sections generated)  
+**Latest Run:** 2026-02-24 - 3,943 words generated with auto-save  
+📋 **[View Run Log](./RUN_LOG.md)** for detailed history of all attempts
+
+### Latest Results (Run #4)
+- ✅ **10-section strategy** with auto-save implemented
+- ✅ **7/10 sections completed** before OOM (3,943 words)
+- ✅ **Quality maintained** - conversational, engaging, voice-optimized
+- ⚠️ Need to complete sections 8-10 (Applications, Future, Conclusion)
+
+**View generated sections:** [`outputs/autosave/`](./outputs/autosave/)
+
+---
 
 ## Overview
 
@@ -200,6 +216,14 @@ This project is currently in the planning phase. Contributions will be welcome a
 
 ---
 
+## 📚 Documentation
+
+- **[RUN_LOG.md](./RUN_LOG.md)** - Detailed history of all pipeline runs and results
+- **[BUSINESS_PLAN.md](./BUSINESS_PLAN.md)** - 12-week roadmap and business strategy
+- **[LICENSE](./LICENSE)** - MIT License
+
+---
+
 ## License
 
 MIT License - see [LICENSE](./LICENSE) for details.
@@ -224,6 +248,6 @@ MIT License - see [LICENSE](./LICENSE) for details.
 
 ---
 
-**Status:** 🚧 Under Construction — Check back soon for updates!
+**Status:** 🚧 Phase 1 MVP - 70% Complete — 7/10 sections generated successfully!
 
-*Last updated: February 21, 2026*
+*Last updated: February 24, 2026*
