@@ -34,6 +34,18 @@ TOTAL_TARGET_WORDS = sum(SECTION_WORD_COUNTS.values())  # 4700 words
 # Acceptable variance per section (±)
 WORD_VARIANCE = 50
 
+# 5-section strategy for single-pass Claude generation
+SINGLE_PASS_SECTION_COUNTS = {
+    'section_1_intro': 900,        # Intro + Hook (0-2 min)
+    'section_2_analysis': 1400,    # Trend Analysis (2-8 min)
+    'section_3_research': 1600,    # Research Deep Dive (8-15 min)
+    'section_4_applications': 1200, # Applications + Examples (15-25 min)
+    'section_5_conclusion': 900,   # Future Outlook + Conclusion (25-30 min)
+}
+
+# Total for single-pass (should equal TOTAL_TARGET_WORDS)
+SINGLE_PASS_TOTAL = sum(SINGLE_PASS_SECTION_COUNTS.values())  # 6000 words
+
 # ============================================================================
 # PROMPT TEMPLATES (modular for easy fine-tuning)
 # ============================================================================
@@ -174,8 +186,6 @@ class ScriptGenerator:
                 For anthropic: api_key, model
         """
         self.provider = provider.lower()
-        self.target_words = TOTAL_TARGET_WORDS
-        self.section_counts = SECTION_WORD_COUNTS
         self.word_variance = WORD_VARIANCE
         
         # Auto-save setup
@@ -185,8 +195,10 @@ class ScriptGenerator:
         if self.provider == "ollama":
             self.ollama_url = kwargs.get('base_url', 'http://127.0.0.1:11434')
             self.model = kwargs.get('model', 'qwen3:8b')
+            self.target_words = TOTAL_TARGET_WORDS
+            self.section_counts = SECTION_WORD_COUNTS
             print(f"Using Ollama: {self.model} @ {self.ollama_url}")
-            print(f"Multi-pass generation enabled (10 sections)")
+            print(f"Multi-pass generation enabled (10 sections, {self.target_words} words)")
             
         elif self.provider == "anthropic":
             api_key = kwargs.get('api_key')
@@ -194,8 +206,10 @@ class ScriptGenerator:
                 raise ValueError("Anthropic API key required for anthropic provider")
             self.client = Anthropic(api_key=api_key)
             self.model = kwargs.get('model', 'claude-sonnet-4-5')
+            self.target_words = SINGLE_PASS_TOTAL
+            self.section_counts = SINGLE_PASS_SECTION_COUNTS
             print(f"Using Anthropic: {self.model}")
-            print(f"Single-pass generation enabled")
+            print(f"Single-pass generation enabled ({self.target_words} words)")
             
         else:
             raise ValueError(f"Unknown provider: {provider}. Use 'ollama' or 'anthropic'")
