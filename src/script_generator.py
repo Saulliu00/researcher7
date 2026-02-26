@@ -517,7 +517,7 @@ class ScriptGenerator:
                     "model": self.model,
                     "prompt": prompt,
                     "stream": False,
-                    "keep_alive": 0,  # Unload model after generation (prevents memory accumulation)
+                    "keep_alive": 300,  # Keep loaded for 5 minutes (Ollama default, prevents HTTP 500 on reload)
                     "options": {
                         "temperature": 0.7,
                         "num_predict": 2000,  # Allow ~1500 words per section
