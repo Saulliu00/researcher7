@@ -9,12 +9,12 @@ from typing import List, Dict, Tuple
 
 
 class CorrelationEngine:
-    def __init__(self, model_name: str = 'all-MiniLM-L6-v2'):
+    def __init__(self, model_name: str = 'paraphrase-MiniLM-L3-v2'):
         """
         Initialize the correlation engine with a sentence transformer model
         
         Args:
-            model_name: HuggingFace model for embeddings (default: lightweight MiniLM)
+            model_name: HuggingFace model for embeddings (default: paraphrase-MiniLM-L3-v2, ~60MB)
         """
         print(f"Loading NLP model: {model_name}...")
         self.model = SentenceTransformer(model_name)

@@ -292,23 +292,25 @@ class ScriptGenerator:
         section_name = 'section_1_hook'
         print(f"Generating Section 1/10: Opening Hook...")
         section1 = self._generate_short_section(
-            f"Write an engaging {self.section_counts[section_name]}-word opening hook for a podcast about trending topics: {top_trends}. Start with an observation about what people are searching for RIGHT NOW. Be conversational and voice-optimized.",
+            f"You are Saul, the host of this podcast. Write an engaging {self.section_counts[section_name]}-word opening hook about trending topics: {top_trends}. Start with 'Hey, this is Saul...' and make an observation about what people are searching for RIGHT NOW. Be conversational, personal, and voice-optimized.",
             self.section_counts[section_name]
         )
         sections.append(section1)
         self._save_section(1, section_name, section1, trends, correlation_data, paper)
         print(f"   ✓ Section 1: {self._count_words(section1)} words")
+        import gc; gc.collect()  # Free memory
         
         # Section 2: Trends Overview
         section_name = 'section_2_trends_overview'
         print(f"Generating Section 2/10: Trends Overview...")
         section2 = self._generate_short_section(
-            f"Write {self.section_counts[section_name]} words giving an overview of these trending topics: {top_trends}. Explain briefly why people are interested. Group related topics together. Voice-optimized for podcast.",
+            f"You are Saul, continuing your podcast. Write {self.section_counts[section_name]} words giving an overview of these trending topics: {top_trends}. Explain briefly why people are interested. Group related topics together. Use first person ('I noticed...', 'What fascinates me...'). Voice-optimized.",
             self.section_counts[section_name]
         )
         sections.append(section2)
         self._save_section(2, section_name, section2, trends, correlation_data, paper)
         print(f"   ✓ Section 2: {self._count_words(section2)} words")
+        import gc; gc.collect()
         
         # Section 3: First Trend Cluster
         section_name = 'section_3_cluster_1'
@@ -320,6 +322,7 @@ class ScriptGenerator:
         )
         sections.append(section3)
         self._save_section(3, section_name, section3, trends, correlation_data, paper)
+        import gc; gc.collect()
         print(f"   ✓ Section 3: {self._count_words(section3)} words")
         
         # Section 4: Second Trend Cluster
@@ -332,6 +335,7 @@ class ScriptGenerator:
         )
         sections.append(section4)
         self._save_section(4, section_name, section4, trends, correlation_data, paper)
+        import gc; gc.collect()
         print(f"   ✓ Section 4: {self._count_words(section4)} words")
         
         # Section 5: Research Intro
@@ -343,6 +347,7 @@ class ScriptGenerator:
         )
         sections.append(section5)
         self._save_section(5, section_name, section5, trends, correlation_data, paper)
+        import gc; gc.collect()
         print(f"   ✓ Section 5: {self._count_words(section5)} words")
         
         # Section 6: Research Deep Dive Part 1
@@ -354,6 +359,7 @@ class ScriptGenerator:
         )
         sections.append(section6)
         self._save_section(6, section_name, section6, trends, correlation_data, paper)
+        import gc; gc.collect()
         print(f"   ✓ Section 6: {self._count_words(section6)} words")
         
         # Section 7: Research Deep Dive Part 2
@@ -365,6 +371,7 @@ class ScriptGenerator:
         )
         sections.append(section7)
         self._save_section(7, section_name, section7, trends, correlation_data, paper)
+        import gc; gc.collect()
         print(f"   ✓ Section 7: {self._count_words(section7)} words")
         
         # Section 8: Applications
@@ -376,6 +383,7 @@ class ScriptGenerator:
         )
         sections.append(section8)
         self._save_section(8, section_name, section8, trends, correlation_data, paper)
+        import gc; gc.collect()
         print(f"   ✓ Section 8: {self._count_words(section8)} words")
         
         # Section 9: Future Implications
@@ -387,17 +395,19 @@ class ScriptGenerator:
         )
         sections.append(section9)
         self._save_section(9, section_name, section9, trends, correlation_data, paper)
+        import gc; gc.collect()
         print(f"   ✓ Section 9: {self._count_words(section9)} words")
         
         # Section 10: Conclusion
         section_name = 'section_10_conclusion'
         print(f"Generating Section 10/10: Conclusion...")
         section10 = self._generate_short_section(
-            f"Write {self.section_counts[section_name]} words for the conclusion. Synthesize key insights from trends + research. Circle back to the original trending topics with new understanding. End with a memorable thought. Voice-optimized for podcast ending.",
+            f"You are Saul, wrapping up your podcast. Write {self.section_counts[section_name]} words for the conclusion. Synthesize key insights from trends + research. Circle back to the original trending topics with new understanding. End with a personal sign-off ('This is Saul, thanks for listening...'). Voice-optimized for podcast ending.",
             self.section_counts[section_name]
         )
         sections.append(section10)
         self._save_section(10, section_name, section10, trends, correlation_data, paper)
+        import gc; gc.collect()
         print(f"   ✓ Section 10: {self._count_words(section10)} words")
         
         # Combine all sections
@@ -614,21 +624,43 @@ Write the complete script now. No meta-commentary - just the script itself:"""
                       paper: Dict) -> str:
         """Create metadata header for the script"""
         
+        # Format trending terms with rankings
+        trending_list = '\n'.join([f"{i+1}. {t['term']}" for i, t in enumerate(trends[:15])])
+        
+        # Format clusters if available
+        clusters_text = ""
+        if correlation_data.get('clusters'):
+            clusters_text = "\n\n**Identified Clusters:**\n"
+            for i, cluster in enumerate(correlation_data['clusters'][:5], 1):
+                cluster_terms = ', '.join(cluster['terms'][:5])
+                clusters_text += f"- Cluster {i}: {cluster_terms}\n"
+        
+        unified_topic = correlation_data['unified_topic']
+        
         header = f"""# Researcher7 Voice Script
 
 **Generated:** {self._get_timestamp()}
+**Host:** Saul
 **LLM Provider:** {self.provider}
 **Model:** {self.model}
-**Unified Topic:** {correlation_data['unified_topic']['theme']}
-**Research Paper:** {paper['title']}
 **Target Length:** 30 minutes (~{self.target_words} words)
 
 ---
 
-## Trending Topics Analyzed
-{', '.join([t['term'] for t in trends[:10]])}
+## Trending Topics Captured
+
+**Top 15 Google Trending Searches:**
+{trending_list}
+
+**Unified Topic:** {unified_topic['theme']}  
+**Confidence:** {unified_topic['confidence']:.1%}  
+**Key Terms:** {', '.join(unified_topic.get('key_terms', [])[:5])}
+{clusters_text}
+
+---
 
 ## Research Source
+
 **{paper['title']}**  
 {', '.join(paper['authors'][:3])} ({paper['year']}) - {paper['citations']:,} citations  
 Source: {paper['source']}  

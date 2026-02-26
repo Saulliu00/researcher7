@@ -74,6 +74,14 @@ class Researcher7:
         print(f"  Confidence: {unified_topic['confidence']:.2%}")
         print(f"  Clusters: {correlation_data['num_clusters']}\n")
         
+        # Free correlation engine memory (OOM prevention)
+        print("💾 Freeing correlation engine memory...")
+        del self.correlation_engine.model
+        del self.correlation_engine
+        import gc
+        gc.collect()
+        print("✓ Memory freed\n")
+        
         # Step 3: Find Academic Paper
         print("📚 Step 3: Finding Research Paper")
         print("-" * 60)
