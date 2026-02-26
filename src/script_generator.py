@@ -517,6 +517,7 @@ class ScriptGenerator:
                     "model": self.model,
                     "prompt": prompt,
                     "stream": False,
+                    "keep_alive": 0,  # Unload model after generation (prevents memory accumulation)
                     "options": {
                         "temperature": 0.7,
                         "num_predict": 2000,  # Allow ~1500 words per section
