@@ -60,11 +60,12 @@ class MultiSourceTrendScraper:
             except Exception as e:
                 print(f"⚠️  Reddit API failed: {e}")
     
-    def get_trending_searches(self, limit: int = 25) -> List[Dict]:
+    def get_trending_searches(self, country: str = 'united_states', limit: int = 25) -> List[Dict]:
         """
         Get trending topics from all sources
         
         Args:
+            country: Country code (kept for backward compatibility, currently ignored)
             limit: Target total number of trends (divided among sources)
         
         Returns:
