@@ -579,7 +579,7 @@ class ScriptGenerator:
 **Context:**
 - **Top Trending Search Terms (Last 24h):** {', '.join(top_trends)}
 - **Unified Topic:** {unified_topic['theme']}
-- **Key Connecting Terms:** {', '.join(unified_topic['key_terms'])}
+- **Key Connecting Terms:** {', '.join(unified_topic.get('key_terms', []))}
 
 **Academic Paper:**
 - **Title:** {paper['title']}
