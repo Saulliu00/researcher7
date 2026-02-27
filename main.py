@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
-from trend_scraper import TrendScraper
+from trend_scraper_multi import MultiSourceTrendScraper as TrendScraper
 from correlation_engine import CorrelationEngine
 from paper_finder import PaperFinder
 from script_generator import ScriptGenerator
